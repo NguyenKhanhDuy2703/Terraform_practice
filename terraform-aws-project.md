@@ -1,23 +1,81 @@
-# Structure of a Terraform AWS Project
-A Terraform AWS project typically consists of several key components that work together to define and manage your infrastructure on AWS. Below are the main components of a Terraform AWS project:
+# Terraform AWS Project Structure
+
+A professional Terraform AWS project is usually organized into reusable modules and environment-specific deployments.
+
+## 1. Recommended Project Layout
+
+```text
 terraform-aws-project/
-│
-├── modules/                   # Chứa các module dùng chung (Tái sử dụng code)
-│   ├── vpc/                   # Cấu hình Mạng
-│   │   ├── main.tf
-│   │   ├── variables.tf
-│   │   └── outputs.tf
-│   ├── ec2_instance/          # Cấu hình Máy chủ EC2
-│   └── s3_bucket/             # Cấu hình Lưu trữ S3
-│
-├── environments/              # Nơi gọi các modules để triển khai thực tế
-│   ├── dev/                   # Môi trường Development
-│   │   ├── main.tf            # Gọi tới ../../modules/vpc, ../../modules/ec2...
-│   │   ├── variables.tf       # Biến riêng cho Dev (vd: instance_type = "t2.micro")
-│   │   ├── outputs.tf
-│   │   └── backend.tf         # Cấu hình lưu State file lên S3 cho Dev
-│   │
-│   └── prod/                  # Môi trường Production
-│       ├── main.tf
-│       ├── variables.tf       # Biến riêng cho Prod (vd: instance_type = "t3.large")
-│       └── backend.tf         # Cấu hình lưu State file lên S3 cho Prod
+|
+|-- modules/                        # Reusable building blocks
+|   |-- vpc/                        # Networking (VPC, subnets, routes, IGW, NAT)
+|   |   |-- main.tf
+|   |   |-- variables.tf
+|   |   `-- outputs.tf
+|   |
+|   |-- ec2_instance/               # Compute (EC2, security groups, IAM profile)
+|   |   |-- main.tf
+|   |   |-- variables.tf
+|   |   `-- outputs.tf
+|   |
+|   `-- s3_bucket/                  # Storage (S3 buckets, policies, encryption)
+|       |-- main.tf
+|       |-- variables.tf
+|       `-- outputs.tf
+|
+|-- environments/                   # Real deployments per environment
+|   |-- dev/
+|   |   |-- main.tf                 # Calls ../../modules/* with dev values
+|   |   |-- variables.tf            # Input variable definitions
+|   |   |-- terraform.tfvars        # Dev values (optional)
+|   |   |-- outputs.tf
+|   |   `-- backend.tf              # Remote state config for dev
+|   |
+|   `-- prod/
+|       |-- main.tf
+|       |-- variables.tf
+|       |-- terraform.tfvars        # Prod values (optional)
+|       |-- outputs.tf
+|       `-- backend.tf              # Remote state config for prod
+|
+|-- .gitignore                      # Ignore sensitive and local files
+|-- Makefile                        # Helper commands (init, plan, apply, destroy)
+`-- README.md                       # Project usage and architecture notes
+```
+
+## 2. What Each Part Does
+
+- `modules/`: write Terraform once, reuse many times.
+- `environments/`: compose modules with different values for each stage (`dev`, `prod`).
+- `backend.tf`: keeps Terraform state remote (recommended: S3 + DynamoDB lock for AWS).
+- `variables.tf`: defines expected inputs and types.
+- `outputs.tf`: exports values for other modules or environments.
+
+## 3. Typical Workflow
+
+```bash
+cd environments/dev
+terraform init
+terraform plan
+terraform apply
+```
+
+For production, run the same flow in `environments/prod` after review and approvals.
+
+## 4. Best Practices
+
+- Keep module logic generic; keep environment differences in `*.tfvars`.
+- Never commit secrets, state files, or credentials.
+- Use consistent naming and tagging across all resources.
+- Use remote state and state locking in team environments.
+- Validate with `terraform fmt`, `terraform validate`, and `terraform plan` before apply.
+
+## 5. Mapping to This Repository
+
+In this repository, your current module structure is:
+
+- `modules/network` for VPC, subnet, route table, and IGW.
+- `modules/compute` for AMI lookup and EC2 creation.
+- `environments/dev` and `environments/prod` for environment-level deployments.
+
+This follows the same professional pattern described above.
