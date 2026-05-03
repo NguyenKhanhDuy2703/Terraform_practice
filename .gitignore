@@ -1,0 +1,38 @@
+# Ignore Terraform state files
+*.tfstate
+*.tfstate.backup
+
+# Ignore .terraform directory (contains provider plugins and modules)
+.terraform/
+
+# Ignore crash logs
+crash.log
+
+# Ignore override files (if any)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Ignore local configuration files (if any)
+.terraformrc
+terraform.rc
+
+# Ignore tfvars and potential secret files
+terraform.tfvars
+*.tfvars
+
+# Private keys
+*.pem
+*.key
+
+# AWS credentials (local config)
+.aws/
+.aws/credentials
+
+# Environment files
+.env
+.env.*
+
+# Terraform state lock file
+.terraform.tfstate.lock.info
